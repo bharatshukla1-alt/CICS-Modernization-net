@@ -1,0 +1,145 @@
+/* ============================================================================
+   app.css — MG-01 app-only helpers.
+   Only what bfsi-theme.css does not provide (modal overlay, focus-trap host,
+   filter-row alignment, skeletons, spinner). Every value derives from a theme
+   token — no literal colours/spacing are invented here.
+   ========================================================================== */
+
+/* Page vertical rhythm */
+.page { padding-block: var(--sp-6); }
+.page-header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--sp-4); flex-wrap: wrap; margin-bottom: var(--sp-5);
+}
+.page-header h1 { margin: 0; }
+
+/* BR-017: keep the details screen's Back/Exit control clickable above the modal
+   overlay (z-index 1000 below) so exit succeeds even while a confirmation
+   dialog is open, without altering the dialog's own cancel behaviour. */
+.screen-exit-btn { position: relative; z-index: 1001; }
+
+/* Section spacing between stacked cards */
+.section + .section { margin-top: var(--sp-5); }
+
+/* Details screen — narrow single-column workbench (UI §3.2 / §4) */
+.workbench { max-width: 640px; margin-inline: auto; }
+
+/* ----------------------------------------------------------------------------
+   Filter row (Screen 1) — baseline-aligned inputs + actions (UI §4)
+   -------------------------------------------------------------------------- */
+.filter-row {
+  display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--sp-4);
+}
+.filter-row .field-code { flex: 0 0 auto; width: 10ch; }
+.filter-row .field-desc { flex: 1 1 16rem; min-width: 12rem; }
+.filter-row .filter-actions { display: flex; gap: var(--sp-3); }
+.filter-row .form-group { margin-bottom: 0; }
+@media (max-width: 600px) {
+  .filter-row { align-items: stretch; }
+  .filter-row .field-code, .filter-row .field-desc { width: 100%; flex-basis: 100%; }
+  .filter-row .filter-actions { width: 100%; }
+  .filter-row .filter-actions .btn { flex: 1 1 auto; }
+}
+
+/* Row action buttons in the results table */
+.row-actions { display: flex; gap: var(--sp-2); justify-content: flex-end; }
+.data-table td.col-actions { text-align: right; white-space: nowrap; }
+.btn-danger-ghost { background: transparent; color: var(--color-danger-700); }
+.btn-danger-ghost:hover { background: var(--color-danger-100); }
+@media (max-width: 600px) {
+  .row-actions { flex-direction: column; }
+}
+
+/* Pager */
+.pager {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--sp-3); margin-top: var(--sp-4);
+}
+.pager .pager-controls { display: flex; gap: var(--sp-2); }
+
+/* Contextual action bar (details record card) */
+.action-bar { display: flex; gap: var(--sp-3); flex-wrap: wrap; }
+@media (max-width: 600px) {
+  .action-bar { flex-direction: column; }
+  .action-bar .btn { width: 100%; }
+}
+
+/* ----------------------------------------------------------------------------
+   Modal / dialog overlay (UI §8/§9)
+   -------------------------------------------------------------------------- */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(10, 37, 64, 0.45);
+  display: flex; align-items: center; justify-content: center;
+  padding: var(--sp-4);
+  animation: fade-in var(--transition);
+}
+.modal-dialog {
+  width: 100%; max-width: 30rem; max-height: calc(100vh - 2 * var(--sp-4));
+  overflow: auto; animation: pop-in var(--transition);
+}
+.modal-dialog .card-body { padding-top: var(--sp-4); }
+.modal-footer { display: flex; justify-content: flex-end; gap: var(--sp-3); margin-top: var(--sp-5); }
+@media (max-width: 600px) {
+  .modal-footer { flex-direction: column-reverse; }
+  .modal-footer .btn { width: 100%; }
+}
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pop-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .modal-overlay, .modal-dialog { animation: none !important; }
+}
+
+/* ----------------------------------------------------------------------------
+   Loading — skeleton rows + inline spinner
+   -------------------------------------------------------------------------- */
+.skeleton {
+  display: block; height: 0.9rem; border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, var(--color-surface-alt), var(--color-primary-50), var(--color-surface-alt));
+  background-size: 200% 100%;
+  animation: shimmer 1.2s ease-in-out infinite;
+}
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .skeleton { animation: none; } }
+/* SEC-007: per-column skeleton widths as classes — no inline style attributes, so the
+   production CSP can drop 'unsafe-inline' from style-src. */
+.skeleton-code { width: 2rem; }
+.skeleton-desc { width: 60%; }
+.skeleton-actions { width: 6rem; margin-left: auto; }
+
+.spinner {
+  width: 1em; height: 1em; border-radius: 50%;
+  border: 2px solid currentColor; border-right-color: transparent;
+  display: inline-block; animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+
+/* Empty-state panel */
+.empty-state {
+  text-align: center; padding: var(--sp-7) var(--sp-5); color: var(--color-text-muted);
+}
+.empty-state h3 { color: var(--color-text); margin-bottom: var(--sp-2); }
+.empty-state .empty-actions { margin-top: var(--sp-4); display: inline-flex; gap: var(--sp-3); }
+
+/* Character counter helper aligns to the right under description */
+.counter { text-align: right; }
+
+/* SEC-007: header/message helpers that used to be inline style attributes.
+   Values match the existing header treatment in bfsi-theme.css (.app-header nav a). */
+.app-header .user-name { color: rgba(255,255,255,0.82); }
+/* Decorative profile icon shown immediately before the signed-in user name */
+.app-header .user-avatar {
+  width: 28px; height: 28px; margin-right: var(--sp-2);
+  border-radius: var(--radius-pill);
+  background: rgba(255,255,255,0.14); color: rgba(255,255,255,0.92);
+  display: grid; place-items: center; flex: none;
+}
+.app-header .btn-on-dark { color: #fff; }
+.message-slot { margin-bottom: var(--sp-4); }
+
+/* Auth splash while Keycloak initialises */
+.auth-splash {
+  min-height: 100vh; display: grid; place-items: center; color: var(--color-text-muted);
+  gap: var(--sp-3);
+}

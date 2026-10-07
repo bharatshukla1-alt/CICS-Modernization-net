@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      SEC-007/SEC-010: Content-Security-Policy defense-in-depth. The policy is generated per build
+      mode by the `mg01-csp` plugin in vite.config.js and substituted for the placeholder below:
+      the production build drops 'unsafe-inline' and the dev-only localhost/ws origins, and takes
+      connect-src from VITE_KEYCLOAK_URL / VITE_API_ORIGIN. Do not hardcode a policy here.
+    -->
+    <meta http-equiv="Content-Security-Policy" content="__CSP_POLICY__" />
+    <title>Transaction Type Maintenance</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

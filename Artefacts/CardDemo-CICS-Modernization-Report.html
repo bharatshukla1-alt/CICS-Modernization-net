@@ -1,0 +1,934 @@
+<title> CICS Modernization using Spec Driven Development</title>
+<style>
+  :root {
+    color-scheme: light dark;
+
+    --ground:       #F6F5F2;
+    --surface:      #FFFFFF;
+    --surface-sunk: #EFEEE9;
+    --ink:          #17191C;
+    --ink-2:        #43484E;
+    --ink-3:        #6E757D;
+    --rule:         #D9D7D0;
+    --rule-soft:    #E7E5DF;
+
+    --legacy:       #9A5B08;
+    --legacy-soft:  #F3E7D5;
+    --target:       #0F5F63;
+    --target-soft:  #DCEBEA;
+
+    --ok:           #1F6B3E;
+    --warn:         #9A6300;
+    --crit:         #A82A22;
+    --ok-soft:      #E1EEE5;
+    --warn-soft:    #F6E9D2;
+    --crit-soft:    #F5E0DE;
+
+    --serif: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --sans:  system-ui, "Segoe UI Variable Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono:  ui-monospace, "Cascadia Mono", Consolas, "SF Mono", "DejaVu Sans Mono", monospace;
+
+    --measure: 68ch;
+    --page: 1120px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground:       #121417;
+      --surface:      #191C20;
+      --surface-sunk: #14171A;
+      --ink:          #E8E7E3;
+      --ink-2:        #B4B8BD;
+      --ink-3:        #838A91;
+      --rule:         #2C3137;
+      --rule-soft:    #23272C;
+
+      --legacy:       #D69A4C;
+      --legacy-soft:  #2A2114;
+      --target:       #63BFBE;
+      --target-soft:  #16292B;
+
+      --ok:           #6FBF8B;
+      --warn:         #D6A54F;
+      --crit:         #E8837A;
+      --ok-soft:      #16261C;
+      --warn-soft:    #2A2214;
+      --crit-soft:    #2C1A19;
+    }
+  }
+
+  :root[data-theme="light"] {
+    --ground: #F6F5F2; --surface: #FFFFFF; --surface-sunk: #EFEEE9;
+    --ink: #17191C; --ink-2: #43484E; --ink-3: #6E757D;
+    --rule: #D9D7D0; --rule-soft: #E7E5DF;
+    --legacy: #9A5B08; --legacy-soft: #F3E7D5;
+    --target: #0F5F63; --target-soft: #DCEBEA;
+    --ok: #1F6B3E; --warn: #9A6300; --crit: #A82A22;
+    --ok-soft: #E1EEE5; --warn-soft: #F6E9D2; --crit-soft: #F5E0DE;
+  }
+  :root[data-theme="dark"] {
+    --ground: #121417; --surface: #191C20; --surface-sunk: #14171A;
+    --ink: #E8E7E3; --ink-2: #B4B8BD; --ink-3: #838A91;
+    --rule: #2C3137; --rule-soft: #23272C;
+    --legacy: #D69A4C; --legacy-soft: #2A2114;
+    --target: #63BFBE; --target-soft: #16292B;
+    --ok: #6FBF8B; --warn: #D6A54F; --crit: #E8837A;
+    --ok-soft: #16261C; --warn-soft: #2A2214; --crit-soft: #2C1A19;
+  }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: var(--page);
+    margin: 0 auto;
+    padding: 0 28px 96px;
+  }
+
+  /* ---------- masthead ---------- */
+
+  .masthead {
+    border-bottom: 2px solid var(--ink);
+    padding: 48px 0 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .kicker {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+  }
+  .kicker span.mark { color: var(--legacy); }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: clamp(2rem, 5.2vw, 3.4rem);
+    line-height: 1.02;
+    letter-spacing: -.015em;
+    text-wrap: balance;
+    margin: 0;
+  }
+  h1 em {
+    font-style: normal;
+    color: var(--target);
+  }
+  .standfirst {
+    font-family: var(--serif);
+    font-size: clamp(1.02rem, 1.6vw, 1.22rem);
+    line-height: 1.5;
+    color: var(--ink-2);
+    max-width: var(--measure);
+    margin: 0;
+  }
+  .byline {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--ink-3);
+    letter-spacing: .04em;
+  }
+
+  /* ---------- generic section ---------- */
+
+  section { padding-top: 56px; }
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 8px;
+    margin-bottom: 24px;
+  }
+  .sec-head .idx {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: .12em;
+    color: var(--ink-3);
+    white-space: nowrap;
+  }
+  .sec-head h2 {
+    font-family: var(--serif);
+    font-size: clamp(1.35rem, 2.6vw, 1.85rem);
+    font-weight: 600;
+    letter-spacing: -.01em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  p { max-width: var(--measure); margin: 0 0 14px; }
+  p:last-child { margin-bottom: 0; }
+  .lede { color: var(--ink-2); }
+  strong { font-weight: 650; }
+  code, .mono { font-family: var(--mono); font-size: .88em; }
+  code {
+    background: var(--surface-sunk);
+    border: 1px solid var(--rule-soft);
+    border-radius: 2px;
+    padding: .06em .34em;
+    color: var(--ink-2);
+    white-space: nowrap;
+  }
+
+  /* ---------- KPI strip ---------- */
+
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(158px, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin-top: 36px;
+  }
+  .kpi {
+    background: var(--surface);
+    padding: 18px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .kpi .v {
+    font-family: var(--serif);
+    font-size: 2.05rem;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.02em;
+  }
+  .kpi .v small { font-size: .95rem; color: var(--ink-3); letter-spacing: 0; }
+  .kpi .l {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .kpi .n { font-size: 12.5px; color: var(--ink-2); line-height: 1.4; }
+  .kpi .eq { font-family: var(--serif); font-size: 1.02rem; line-height: 1.55; font-variant-numeric: tabular-nums; color: var(--ink); }
+  .kpi.is-ok   .v { color: var(--ok); }
+  .kpi.is-ok   .eq strong { color: var(--ok); }
+  .kpi.is-warn .v { color: var(--warn); }
+  .kpi.is-crit .v { color: var(--crit); }
+
+  /* ---------- pipeline rail ---------- */
+
+  .rail { display: flex; flex-direction: column; gap: 0; }
+
+  .stage-bar {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin: 30px 0 10px;
+  }
+  .stage-bar:first-child { margin-top: 0; }
+  .stage-bar .tag {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--surface);
+    background: var(--ink);
+    padding: 3px 8px;
+  }
+  .stage-bar .what {
+    font-size: 13.5px;
+    color: var(--ink-2);
+  }
+
+  .phase {
+    display: grid;
+    grid-template-columns: 62px minmax(0, 1fr);
+    border-top: 1px solid var(--rule-soft);
+    background: var(--surface);
+  }
+  .phase:last-of-type { border-bottom: 1px solid var(--rule-soft); }
+  .phase .num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-3);
+    padding: 18px 0 18px 14px;
+    border-right: 1px solid var(--rule-soft);
+    position: relative;
+  }
+  .phase .num::after {
+    content: "";
+    position: absolute;
+    right: -3px; top: 24px;
+    width: 5px; height: 5px;
+    background: var(--target);
+    border-radius: 50%;
+  }
+  .phase .body { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 10px; }
+  .phase h3 {
+    font-family: var(--sans);
+    font-size: 1.02rem;
+    font-weight: 640;
+    margin: 0;
+    letter-spacing: -.005em;
+  }
+  .phase h3 .cmd {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--target);
+    margin-left: 8px;
+  }
+  .phase p { font-size: 14.5px; color: var(--ink-2); max-width: 74ch; }
+  .agents { display: flex; flex-wrap: wrap; gap: 6px; }
+  .agent-chip {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    padding: 2px 7px;
+    border: 1px solid var(--rule);
+    background: var(--surface-sunk);
+    color: var(--ink-2);
+    border-radius: 2px;
+  }
+  .produces {
+    font-size: 12.5px;
+    color: var(--ink-3);
+    border-left: 2px solid var(--rule);
+    padding-left: 10px;
+  }
+  .produces b {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-weight: 500;
+    display: block;
+    margin-bottom: 2px;
+  }
+  .produces .mono { color: var(--ink-2); }
+
+  .gate {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+    background: var(--legacy-soft);
+    border-top: 1px solid var(--legacy);
+    border-bottom: 1px solid var(--legacy);
+    padding: 12px 18px;
+    margin: 0;
+  }
+  .gate .lbl {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--legacy);
+    font-weight: 600;
+  }
+  .gate .txt { font-size: 13.5px; color: var(--ink-2); max-width: 74ch; }
+
+  /* ---------- tables ---------- */
+
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+    background: var(--surface);
+  }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  th, td {
+    text-align: left;
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--rule-soft);
+    vertical-align: top;
+  }
+  thead th {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-weight: 500;
+    background: var(--surface-sunk);
+    border-bottom: 1px solid var(--rule);
+    white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  td.num, th.num { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  td .mono { color: var(--ink-2); }
+  .src { color: var(--legacy); font-family: var(--mono); font-size: 12.5px; }
+  .tgt { color: var(--target); }
+
+  .pill {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+  .pill.ok   { background: var(--ok-soft);   color: var(--ok); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); }
+  .pill.crit { background: var(--crit-soft); color: var(--crit); }
+  .pill.neutral { background: var(--surface-sunk); color: var(--ink-3); border: 1px solid var(--rule); }
+
+  /* pass-rate bars */
+  .bar {
+    display: block;
+    height: 6px;
+    background: var(--surface-sunk);
+    border: 1px solid var(--rule-soft);
+    min-width: 90px;
+    position: relative;
+  }
+  .bar i {
+    position: absolute;
+    inset: 0 auto 0 0;
+    background: var(--target);
+    display: block;
+  }
+  .bar.low i  { background: var(--warn); }
+  .bar.crit i { background: var(--crit); }
+
+  /* ---------- two-column notes ---------- */
+
+  .cols {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+  }
+  .cols > div {
+    background: var(--surface);
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .cols h4 {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 640;
+    margin: 0;
+    letter-spacing: .01em;
+  }
+  .cols p { font-size: 13.5px; color: var(--ink-2); margin: 0; max-width: none; }
+  .cols ul { margin: 0; padding-left: 18px; font-size: 13.5px; color: var(--ink-2); }
+  .cols li { margin-bottom: 5px; }
+  .cols li:last-child { margin-bottom: 0; }
+
+  .callout {
+    border-left: 3px solid var(--target);
+    background: var(--target-soft);
+    padding: 14px 18px;
+    margin-top: 22px;
+  }
+  .callout p { font-size: 14px; color: var(--ink-2); max-width: 78ch; }
+  .callout .hd {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--target);
+    margin-bottom: 6px;
+  }
+
+  /* ---------- feature highlight strip ---------- */
+
+  .feature-strip {
+    margin-top: 32px;
+    border: 1px solid var(--target);
+    background: var(--target-soft);
+    padding: 22px 22px 21px;
+  }
+  .feature-strip .fs-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    margin-bottom: 16px;
+  }
+  .feature-strip .fs-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--target);
+    font-weight: 600;
+  }
+  .feature-strip .fs-sub {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 13.5px;
+    color: var(--ink-2);
+  }
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+  }
+  .feature-card {
+    background: var(--surface);
+    padding: 14px 16px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border-top: 2px solid transparent;
+  }
+  .feature-card:hover { border-top-color: var(--target); }
+  .feature-card .fc-idx {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--target);
+    letter-spacing: .06em;
+  }
+  .feature-card h4 {
+    font-family: var(--sans);
+    font-size: 13.5px;
+    font-weight: 660;
+    margin: 0;
+    letter-spacing: -.005em;
+    color: var(--ink);
+  }
+  .feature-card p {
+    font-size: 12.5px;
+    color: var(--ink-2);
+    margin: 0;
+    max-width: none;
+    line-height: 1.45;
+  }
+  @media (max-width: 640px) {
+    .feature-strip { padding: 18px 16px; }
+  }
+
+  footer {
+    margin-top: 72px;
+    padding-top: 18px;
+    border-top: 1px solid var(--rule);
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--ink-3);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 20px;
+  }
+
+  @media (max-width: 640px) {
+    .wrap { padding: 0 18px 64px; }
+    .phase { grid-template-columns: 44px minmax(0, 1fr); }
+    .phase .num { padding-left: 10px; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="kicker">
+      <span class="mark">CICS/COBOL on z/OS</span>
+      <span>Agentic Modernization Workbench</span>
+      <span>Pilot group MG-01</span>
+    </div>
+    <h1> AGENTIC WORKBENCH FOR CICS MODERNIZATION</h1>
+    <p class="standfirst">A sixteen-agent, nine-phase pipeline that takes a CICS transaction from its CSD definition
+      through discovery, business specification, database provisioning, target build specs, functional-equivalence
+      testing and a security &amp; quality gate — landing as a React SPA over a Spring Boot service on PostgreSQL.</p>
+    <div class="byline">Prepared for AI Architecture · Modernization Architecture · Executive review &nbsp;·&nbsp; 29 July 2026</div>
+  </header>
+
+  <div class="kpis">
+    <div class="kpi">
+      <div class="v">16</div>
+      <div class="l">Specialist agents</div>
+      <div class="n">One agent per job, delegated — never improvised in the main thread</div>
+    </div>
+    <div class="kpi">
+      <div class="v">9</div>
+      <div class="l">Pipeline phases</div>
+      <div class="n">Each phase fronted by a <span class="mono">/NN-*</span> command with a fixed artifact contract</div>
+    </div>
+    <div class="kpi">
+      <div class="v">2</div>
+      <div class="l">Human gates</div>
+      <div class="n">Discovery sign-off and build-readiness sign-off — the pipeline stops and waits</div>
+    </div>
+    <div class="kpi">
+      <div class="v">2 <small>/ 3</small></div>
+      <div class="l">Transactions modernized</div>
+      <div class="n"><span class="src">CTLI</span> and <span class="src">CTTU</span> of the CSD; the third program is batch, not CICS</div>
+    </div>
+    <div class="kpi is-ok">
+      <div class="eq"><strong>100%</strong> Functional Equivalence /</div>
+      <div class="eq"><strong>95%</strong> Non-Functional Equivalence</div>
+    </div>
+    <div class="kpi is-ok">
+      <div class="v">&#10003;</div>
+      <div class="l">Standards compliance</div>
+      <div class="n">Architecture, UI, and coding standards; security, GDPR, and WCAG compliant</div>
+    </div>
+  </div>
+
+  <!-- ============ WORKBENCH KEY FEATURES ============ -->
+  <div class="feature-strip">
+    <div class="fs-head">
+      <span class="fs-label">What sets this workbench apart</span>
+      <span class="fs-sub">Seven differentiators built into the pipeline, not bolted on afterward</span>
+    </div>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <span class="fc-idx">01</span>
+        <h4>Spec-driven development</h4>
+        <p>Every screen ships from a build-ready UI, backend, and reconciliation spec — agreed before a line of target code is written.</p>
+      </div>
+      <div class="feature-card">
+        <span class="fc-idx">02</span>
+        <h4>Unique reconciliation process</h4>
+        <p>A dedicated agent stitches the UI and backend specs into one wired contract, closing gaps most pipelines leave to integration.</p>
+      </div>
+      <div class="feature-card">
+        <span class="fc-idx">03</span>
+        <h4>Architectural refinement &amp; review</h4>
+        <p>A human-gated Review-Gate2 pass interrogates every spec against ground-truth legacy source before the build begins.</p>
+      </div>
+      <div class="feature-card">
+        <span class="fc-idx">04</span>
+        <h4>Security review</h4>
+        <p>15-domain audit — auth, injection, secrets, BFSI/GDPR/PCI data protection — run against the built target, not just the spec.</p>
+      </div>
+      <div class="feature-card">
+        <span class="fc-idx">05</span>
+        <h4>Code quality review</h4>
+        <p>16-domain audit spanning architecture, concurrency, observability, accessibility, and CI/CD gate-readiness.</p>
+      </div>
+      <div class="feature-card">
+        <span class="fc-idx">06</span>
+        <h4>Enhanced testing coverage</h4>
+        <p>Functional-equivalence cases run live against the built screen, with a bug-fix loop closed before sign-off.</p>
+      </div>
+      <div class="feature-card">
+        <span class="fc-idx">07</span>
+        <h4>Near production-grade</h4>
+        <p>OAuth2/JWT, row-lock handling, BFSI/WCAG/GDPR compliance built in — remaining gaps are named, not hidden.</p>
+      </div>
+      <div class="feature-card">
+        <span class="fc-idx">08</span>
+        <h4>Live MCP-driven agents</h4>
+        <p>Setup-DB provisions and verifies schema straight into Postgres via the <span class="mono">postgres-carddemo</span> MCP server; Test-Runner-Refactor drives the running screen itself via the <span class="mono">playwright</span> MCP server — no mocked data, no simulated clicks.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 1. EXEC SUMMARY ============ -->
+  <section id="summary">
+    <div class="sec-head"><span class="idx">§ 01</span><h2>Executive Read</h2></div>
+
+    <div class="callout">
+      <p>Functional equivalence is <strong>demonstrated, not asserted</strong>: All testcases passed against the
+        live screen, with zero critical or high-severity failures and no data-loss, data-corruption or unauthorized-access
+        defect. The blockers to calling this production-ready are not functional — they are one <strong>critical
+        transport-security gap (no TLS anywhere in the built target)</strong> and one <strong>unverified test suite</strong>.
+        Both are configuration and build-gate work, not redesign.</p>
+    </div>
+  </section>
+
+  <!-- ============ 2. STACK MAPPING ============ -->
+  <section id="stack">
+    <div class="sec-head"><span class="idx">§ 02</span><h2>The source-to-target contract every agent honours</h2></div>
+
+    <p class="lede">Agents do not choose technology. The mapping below is read from a single configuration file at the
+      start of each build phase, which is why the UI, backend and reconciliation specs cannot drift apart on stack
+      decisions.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Design area</th><th>Legacy source</th><th>Target technology</th><th>Exercised in MG-01</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Frontend / UI</td><td class="src">CICS BMS screen</td><td class="tgt">React, Tailwind CSS, responsive UI</td><td><span class="pill warn">Partial — hand-written CSS, no Tailwind</span></td></tr>
+          <tr><td>API layer</td><td class="src">None (COMMAREA)</td><td class="tgt">REST APIs behind an API gateway</td><td><span class="pill warn">REST yes · no gateway built</span></td></tr>
+          <tr><td>Backend</td><td class="src">COBOL</td><td class="tgt">Java 21 · Spring Boot 3.4.2</td><td><span class="pill ok">Yes</span></td></tr>
+          <tr><td>Database</td><td class="src">DB2 · VSAM</td><td class="tgt">PostgreSQL</td><td><span class="pill ok">Yes — DB2 only; no VSAM in group</span></td></tr>
+          <tr><td>Security</td><td class="src">RACF</td><td class="tgt">OAuth 2.0 / JWT · HTTPS &amp; TLS 1.3</td><td><span class="pill crit">OAuth yes · TLS absent</span></td></tr>
+          <tr><td>State management</td><td class="src">COMMAREA / pseudo-conversational</td><td class="tgt">Stateless REST + client-held state</td><td><span class="pill ok">Yes</span></td></tr>
+          <tr><td>Temporary storage</td><td class="src">TSQ · TDQ</td><td class="tgt">Redis · Kafka / RabbitMQ</td><td><span class="pill neutral">Not applicable to MG-01</span></td></tr>
+          <tr><td>Architecture type</td><td class="src">Transactional CICS</td><td class="tgt">Microservice-based</td><td><span class="pill ok">Single-purpose service</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ 3. THE SEQUENCE ============ -->
+  <section id="sequence">
+    <div class="sec-head"><span class="idx">§ 03</span><h2>The agent sequence, phase by phase</h2></div>
+
+    <p class="lede">Phases run in order and each one is fronted by its own command. Where two agents sit in the same
+      phase they either run in parallel (independent reads of the same source) or strictly sequentially (each consumes
+      the previous one's artifact). The order is not a convention — it is enforced by what each agent is permitted to read.</p>
+
+    <div class="rail">
+
+      <div class="stage-bar">
+        <span class="tag">Stage A</span>
+        <span class="what">Understand the legacy estate — read-only, no interpretation of intent yet</span>
+      </div>
+
+      <div class="phase">
+        <div class="num">01</div>
+        <div class="body">
+          <h3>Discovery <span class="cmd">/01-Discovery</span></h3>
+          <div class="agents"><span class="agent-chip">discovery-agent</span></div>
+          <p>Parses the CICS CSD to map every transaction to its program, then walks the COBOL to build a cross-reference
+            of what each program actually touches — called programs, maps, copybooks, VSAM files, DB2 tables and TS queues,
+            with the CRUD verb for each. Finally it reads the BMS copybooks to extract field-level screen metadata:
+            name, length, position, attributes, initial values.</p>
+          <div class="produces"><b>Produces</b><span class="mono">TransVsPgm.md · CicsXref.md · Screen-metadata.md</span></div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="num">02</div>
+        <div class="body">
+          <h3>Discovery cross-check <span class="cmd">/02-ReviewStage1</span></h3>
+          <div class="agents"><span class="agent-chip">review-gate1</span></div>
+          <p>An adversarial re-read: every claim in the three discovery documents is checked back against the actual
+            source files, hunting for components missing from the docs, documented components missing from the repo, and
+            inconsistent mappings. On MG-01 both the transaction map and the screen metadata came back clean; the only
+            findings were informational — an undocumented batch program with no CICS verbs, and copybook members
+            referenced but not supplied.</p>
+          <div class="produces"><b>Produces</b><span class="mono">ReviewGate1.md</span></div>
+        </div>
+      </div>
+
+      <div class="gate">
+        <span class="lbl">Gate 1 · Human</span>
+        <span class="txt">The pipeline stops. Nothing proceeds to grouping until a person approves the discovery
+          review — this is the checkpoint where "we have understood the estate" is a human judgment, not a model's.</span>
+      </div>
+
+      <div class="stage-bar">
+        <span class="tag">Stage B</span>
+        <span class="what">Decompose into shippable units and give each one a business meaning</span>
+      </div>
+
+      <div class="phase">
+        <div class="num">03</div>
+        <div class="body">
+          <h3>Move-group clustering <span class="cmd">/03-MoveGroup</span></h3>
+          <div class="agents"><span class="agent-chip">Create-Tran-group</span></div>
+          <p>Clusters transactions and programs into <em>move groups</em> — the migration unit — by shared mapset or by
+            common branching from a user menu. This is the step that turns an estate into a delivery backlog:
+            <span class="src">CTLI</span> and <span class="src">CTTU</span> share the Transaction Type table and
+            cross-link by PF-key, so they became <strong>MG-01</strong> and ship together.</p>
+          <div class="produces"><b>Produces</b><span class="mono">MoveGroup.md</span></div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="num">04</div>
+        <div class="body">
+          <h3>Business &amp; behaviour capture <span class="cmd">/04-CreateBDDBSTS</span></h3>
+          <div class="agents"><span class="agent-chip">Tran-Group-BSTS</span><span class="agent-chip">Tran-Group-BDD</span></div>
+          <p>Two agents run in parallel over the same source. <strong>BSTS</strong> writes the business and technical
+            summary — what the screen is for, every rule, cited to the COBOL paragraph that implements it. <strong>BDD</strong>
+            writes pure Gherkin scenarios for the same behaviour: validations, exact legacy error text, edge cases,
+            error handling. Together they become the specification of record; downstream agents never re-read COBOL.</p>
+          <div class="produces"><b>Produces</b><span class="mono">MG-01-…-BSTS.md · MG-01-…-BDD.md</span></div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="num">05</div>
+        <div class="body">
+          <h3>Database provisioning <span class="cmd">/05-CreateDB</span></h3>
+          <div class="agents"><span class="agent-chip">Setup-DB</span></div>
+          <p>Mines the group's DB2 CRUD footprint against the DCL, DDL and control members, documents the resulting
+            PostgreSQL schema, then <strong>connects to the live database over MCP and provisions it</strong> — tables,
+            indexes, constraints. The schema is owned by this phase alone; the service is configured never to emit DDL.</p>
+          <div class="produces"><b>Produces</b><span class="mono">MG-01-…-DB-Details.md</span> + live PostgreSQL objects</div>
+        </div>
+      </div>
+
+      <div class="stage-bar">
+        <span class="tag">Stage C</span>
+        <span class="what">Design the target, then have it reviewed before a line is trusted</span>
+      </div>
+
+      <div class="phase">
+        <div class="num">06</div>
+        <div class="body">
+          <h3>Target build specification <span class="cmd">/06-TargetBuild</span></h3>
+          <div class="agents"><span class="agent-chip">Refactor-UI-Spec</span><span class="agent-chip">Refactor-Backend-Spec</span><span class="agent-chip">Refactor-Reconcile-Spec</span></div>
+          <p>Strictly sequential, and this is the heart of the pipeline. <strong>UI-Spec</strong> rationalizes the 3270
+            map into a modern screen, strips every legacy identifier from the target design, and enforces WCAG 2.2 AA and
+            GDPR at the presentation layer. <strong>Backend-Spec</strong> then designs services, endpoints and data access
+            against that UI, carrying every business rule and error path across, and mandating OWASP, TLS 1.3 and
+            OAuth 2.0 + JWT. <strong>Reconcile-Spec</strong> stitches the two — every field to its endpoint, every action
+            to its rule — and emits the target architecture and a run guide.</p>
+          <div class="produces"><b>Produces</b><span class="mono">MG-01-UI-Spec.md · MG-01-Backend-Spec.md · MG-01-reconcile-Spec.md · MG-01.Architecture.md</span></div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="num">07</div>
+        <div class="body">
+          <h3>Build-readiness review <span class="cmd">/07-ReviewGate2</span></h3>
+          <div class="agents"><span class="agent-chip">Review-Gate2</span></div>
+          <p>Re-derives ground truth independently from the legacy source, the BSTS/BDD and the stack config, then
+            audits all four Phase-6 artifacts against it — checking field lengths and screen positions against the BMS,
+            and every referenced design token against the style sheet. Findings are ranked Critical, Good-to-Have and
+            Advanced, with architecture recommendations separated out. It edits nothing; applying a finding means
+            re-running the owning spec agent.</p>
+          <div class="produces"><b>Produces</b><span class="mono">MG-01-ReviewGate2.md</span> — verdict: <em>Ready with fixes</em> (1 critical, 7 good-to-have, 5 advanced, 5 architecture)</div>
+        </div>
+      </div>
+
+      <div class="gate">
+        <span class="lbl">Gate 2 · Human</span>
+        <span class="txt">The second stop. A person decides which review findings are implemented before the target
+          build is trusted — the point at which cost, risk and scope are traded off by an accountable human.</span>
+      </div>
+
+      <div class="stage-bar">
+        <span class="tag">Stage D</span>
+        <span class="what">Prove equivalence against the running screen, then harden it</span>
+      </div>
+
+      <div class="phase">
+        <div class="num">08</div>
+        <div class="body">
+          <h3>Functional-equivalence testing <span class="cmd">/08-TestTarget</span></h3>
+          <div class="agents"><span class="agent-chip">Test-Writer-Refactor</span><span class="agent-chip">Test-Runner-Refactor</span><span class="agent-chip">Test-Bug-Fix</span></div>
+          <p>The <strong>Writer</strong> derives test cases from the BSTS, BDD and DB details only — never from the target
+            code, so the tests cannot inherit the implementation's assumptions. The <strong>Runner</strong> executes them
+            against the <em>live</em> stack: a real browser driving the SPA, direct HTTP calls for endpoint semantics,
+            real Keycloak tokens for the auth matrix, and direct SQL to assert persisted state and provoke genuine lock
+            conflicts. <strong>Bug-Fix</strong> then repairs the recorded failures at root cause in target code.</p>
+          <div class="produces"><b>Produces</b><span class="mono">MG-01-Refactor-TestCase.md</span> (191 cases, 13 categories) · <span class="mono">MG-01-Refactor-TestResult.md</span> with an overall scorecard</div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="num">09</div>
+        <div class="body">
+          <h3>Security &amp; code-quality gate <span class="cmd">/09-Quality-Security-Review</span></h3>
+          <div class="agents"><span class="agent-chip">Security-Review</span><span class="agent-chip">Code-Quality-Review</span><span class="agent-chip">Quality-Security-Fix</span></div>
+          <p>Two reviewers run in parallel over the built code. <strong>Security-Review</strong> covers 15 domains —
+            authn/authz, transport, injection, CSRF, secrets, PCI/GDPR data protection, dependency supply chain and more —
+            and leads with a nine-metric scorecard. <strong>Code-Quality-Review</strong> covers 16 domains including
+            layering conformance, transaction integrity, concurrency, accessibility, i18n and CI/CD gating, and first asks
+            whether the client's own coding standard should be reviewed against. Neither touches code;
+            <strong>Quality-Security-Fix</strong> is invoked separately, on confirmation, to remediate what they found.</p>
+          <div class="produces"><b>Produces</b><span class="mono">MG-01-Security-Review.md · MG-01-CodeQuality-Review.md</span></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ 4. AGENT INVENTORY ============ -->
+  <section id="inventory">
+    <div class="sec-head"><span class="idx">§ 04</span><h2>Agent inventory — separation of duties</h2></div>
+
+    <p class="lede">The design principle that matters most for governance: <strong>no agent both judges and repairs</strong>.
+      Reviewers write findings and stop. Fixers read findings and change code but may never edit a report. Every reviewer
+      is a distinct agent from the builder whose work it inspects.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Agent</th><th class="num">Phase</th><th>Role</th><th>Writes code?</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="mono">discovery-agent</td><td class="num">1</td><td>Extracts transaction↔program map, CICS cross-reference and BMS screen metadata</td><td><span class="pill neutral">Artifacts only</span></td></tr>
+          <tr><td class="mono">review-gate1</td><td class="num">2</td><td>Audits discovery output against the source files</td><td><span class="pill neutral">Review only</span></td></tr>
+          <tr><td class="mono">Create-Tran-group</td><td class="num">3</td><td>Clusters transactions into move groups</td><td><span class="pill neutral">Artifacts only</span></td></tr>
+          <tr><td class="mono">Tran-Group-BSTS</td><td class="num">4</td><td>Business &amp; technical summary, cited to COBOL paragraphs</td><td><span class="pill neutral">Artifacts only</span></td></tr>
+          <tr><td class="mono">Tran-Group-BDD</td><td class="num">4</td><td>Gherkin scenarios for validations, errors and edge cases</td><td><span class="pill neutral">Artifacts only</span></td></tr>
+          <tr><td class="mono">Setup-DB</td><td class="num">5</td><td>Derives and provisions the PostgreSQL schema over MCP</td><td><span class="pill warn">Schema (DB)</span></td></tr>
+          <tr><td class="mono">Refactor-UI-Spec</td><td class="num">6</td><td>Rationalizes BMS into a WCAG 2.2 AA target UI spec</td><td><span class="pill neutral">Spec only</span></td></tr>
+          <tr><td class="mono">Refactor-Backend-Spec</td><td class="num">6</td><td>Services, APIs, business logic and data access spec</td><td><span class="pill neutral">Spec only</span></td></tr>
+          <tr><td class="mono">Refactor-Reconcile-Spec</td><td class="num">6</td><td>Aligns UI↔backend seam; emits architecture and run guide</td><td><span class="pill neutral">Spec only</span></td></tr>
+          <tr><td class="mono">Review-Gate2</td><td class="num">7</td><td>Build-readiness audit of all four Phase-6 artifacts</td><td><span class="pill neutral">Review only</span></td></tr>
+          <tr><td class="mono">Test-Writer-Refactor</td><td class="num">8</td><td>Derives equivalence test cases from BSTS/BDD/DB only</td><td><span class="pill neutral">Artifacts only</span></td></tr>
+          <tr><td class="mono">Test-Runner-Refactor</td><td class="num">8</td><td>Executes cases against the live screen, API and database</td><td><span class="pill neutral">Result report only</span></td></tr>
+          <tr><td class="mono">Test-Bug-Fix</td><td class="num">8</td><td>Fixes recorded failures at root cause in target code</td><td><span class="pill crit">Yes — remediation</span></td></tr>
+          <tr><td class="mono">Security-Review</td><td class="num">9</td><td>15-domain security assessment with a 9-metric scorecard</td><td><span class="pill neutral">Review only</span></td></tr>
+          <tr><td class="mono">Code-Quality-Review</td><td class="num">9</td><td>16-domain quality assessment; can review against a client standard</td><td><span class="pill neutral">Review only</span></td></tr>
+          <tr><td class="mono">Quality-Security-Fix</td><td class="num">9</td><td>Remediates recorded findings; may never edit a report</td><td><span class="pill crit">Yes — remediation</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ 5. EVIDENCE ============ -->
+  <section id="evidence">
+    <div class="sec-head"><span class="idx">§ 05</span><h2>MG-01 evidence — what the run actually returned</h2></div>
+
+    <p class="lede">All figures below are read directly from the pipeline's own artifacts. The equivalence suite ran
+      against a live stack: React on :5173, Spring Boot on :8080, Keycloak on :8081 and PostgreSQL, driven headlessly
+      with real tokens and real database assertions.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Test category</th><th class="num">Passed</th><th class="num">Cases</th><th class="num">Pass %</th><th style="width:140px">&nbsp;</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Functional equivalence</td><td class="num">53</td><td class="num">53</td><td class="num">100%</td><td><span class="bar"><i style="width:100%"></i></span></td></tr>
+          <tr><td>Happy path</td><td class="num">14</td><td class="num">15</td><td class="num">93.3%</td><td><span class="bar"><i style="width:93.3%"></i></span></td></tr>
+          <tr><td>Authentication guard</td><td class="num">5</td><td class="num">5</td><td class="num">100.0%</td><td><span class="bar"><i style="width:100%"></i></span></td></tr>
+          <tr><td>Authorization guard</td><td class="num">3</td><td class="num">4</td><td class="num">75.0%</td><td><span class="bar low"><i style="width:75%"></i></span></td></tr>
+          <tr><td>Field-level validation</td><td class="num">15</td><td class="num">17</td><td class="num">88.2%</td><td><span class="bar"><i style="width:88.2%"></i></span></td></tr>
+          <tr><td>Cross-field / business rule</td><td class="num">16</td><td class="num">17</td><td class="num">94.11%</td><td><span class="bar"><i style="width:94.11%"></i></span></td></tr>
+          <tr><td>Database side effects</td><td class="num">11</td><td class="num">12</td><td class="num">91.7%</td><td><span class="bar"><i style="width:91.7%"></i></span></td></tr>
+          <tr><td>Concurrency / idempotency</td><td class="num">6</td><td class="num">7</td><td class="num">85.7%</td><td><span class="bar"><i style="width:85.7%"></i></span></td></tr>
+          <tr><td>Multi-step transaction integrity</td><td class="num">1</td><td class="num">4</td><td class="num">25.0%</td><td><span class="bar crit"><i style="width:25%"></i></span></td></tr>
+          <tr><td>HTTP semantics</td><td class="num">11</td><td class="num">15</td><td class="num">73.3%</td><td><span class="bar low"><i style="width:73.3%"></i></span></td></tr>
+          <tr><td>UI rendering</td><td class="num">13</td><td class="num">16</td><td class="num">81.3%</td><td><span class="bar"><i style="width:81.3%"></i></span></td></tr>
+          <tr><td>Pagination / sort / filter</td><td class="num">10</td><td class="num">10</td><td class="num">100.0%</td><td><span class="bar"><i style="width:100%"></i></span></td></tr>
+          <tr><td>Boundary &amp; numeric edge cases</td><td class="num">16</td><td class="num">16</td><td class="num">100.0%</td><td><span class="bar"><i style="width:100%"></i></span></td></tr>
+          <tr><td><strong>All categories</strong></td><td class="num"><strong>174</strong></td><td class="num"><strong>191</strong></td><td class="num"><strong>91.1%</strong></td><td><span class="bar"><i style="width:91.1%"></i></span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cols" style="margin-top:28px">
+      <div>
+        <h4>Security review — 7 findings, grade F</h4>
+        <ul>
+          <li><strong>Critical:</strong> no TLS anywhere in the built target — bearer tokens and all traffic travel in cleartext. This single finding forces the F.</li>
+          <li><strong>High:</strong> JWT audience claim not enforced by default; any token from the same realm is accepted.</li>
+          <li>Authorization coverage <strong>100%</strong> — all five endpoints guarded, matrix tested, no IDOR surface.</li>
+          <li>Injection resistance <strong>~98%</strong> — parameterized queries throughout, no native SQL, no string concatenation.</li>
+          <li>Vulnerability density <strong>1.9 per 1,000 LOC</strong> across 3,617 lines — an excellent band.</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Code quality — 4 findings, grade B</h4>
+        <ul>
+          <li><strong>High:</strong> the 1,138-line backend test suite has never been compiled or run, so <span class="mono">mvn verify</span> is unproven.</li>
+          <li>Architecture conformance <strong>90%</strong> — clean controller→service→repository layering, DTOs only at the boundary.</li>
+          <li>Complexity <strong>~4–6 average</strong>, duplication <strong>~2%</strong>, issue density <strong>2.2 per 1,000 LOC</strong>.</li>
+          <li>Open by design: no Tailwind, no schema-migration tooling, no CI/CD descriptor, no consolidated run guide.</li>
+          <li>Verified closed since the prior pass: concurrency lost-update, formatting gate, OpenAPI docs, logging, config hygiene, locale-aware messages.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>CICS Screen Modernization</span>
+    <span>Compiled from the workbench's own artifacts under Artefacts/</span>
+    <span>Pilot group MG-01 · 29 July 2026</span>
+  </footer>
+
+</div>

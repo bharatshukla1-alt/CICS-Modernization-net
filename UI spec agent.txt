@@ -1,0 +1,44 @@
+Command workflow -
+
+1. The command will ask whether the user want to 1. Re-build  2. Refactor 
+
+
+
+2. For Rebuild R path option, Build an agent Rebuild-UI-Spec.md in the folder .Claude/Agents/ to do the following
+   2.1. it will ask the tran group name and how many screen it wants to build (keep it minimal upto 3-5 screen at a time)
+        in the format <Tran Group> <# of Screen>
+
+   2.2. After the selection, it ask whether the user would use 
+        2.2.1. Figma for the screen UI layout. If selected, Provide all the URL for the screens to be build in the format <Tran Group> <Screen Name> <Figma URL>
+        2.2.2. From the uploaded sample image for the screen creation. If selected, the agent will lookup the path input/Sample Screen/  for the sample screens
+               whose theme would be replicated. The sample image should be named <Tran Group>-<Screen Name>-Sample. It can be in jpeg or png format.
+
+   2.3. Based on the selection of any one of the above option, this agent will create a spec template . This spec should be descriptive enough and covering all 
+	the screen features like Section 1: Screen Overview & Metadata, Section 2: Layout & Grid Structure, Section 3: Component Hierarchy, Section 4: Component-to-Style-Guide 	Mapping, Section 5: Design Token Application, Section 6: Component States & Variants, Section 7: Content & Copy, Section 8: Assets, Section 9: Responsive Behavior, Section 
+	10: Interaction & Navigation, Section 11: Data Bindings & Dynamic Content, Section 12: Accessibility Requirements, Section 13: Deviations, Assumptions & Gaps and Section 14: 	Acceptance Criteria. Now the agent based on the input UI design from figma url or uploaded screen template) and refer the file Style-sheet.md  will try to fill up the above 
+        sections as much as possible and will prompt user to provide additional description wherever needed in the spec file (highlight the area where inputs are needed).
+
+   2.4. The agent will now create the spec for each screen under .Claude/Specs/UI-Spec and follow the naming convention <input Tran Group>-<Screen Name>-Spec.md with the above details.
+	If the file with same name already exist, then ask the user either to overwrite or skip the update. If none exists, then create a new spec file. Since this agent will create Screen 	specs for Rebuild R Path, hence it will not refer to any existing files like MoveGroup.md or Screen-Metadata.md, since these contains existing screen definition.
+
+   
+   
+
+3. For refactor option, the build agent Refactor-UI.md in the folder .Claude/Agents/  which will ask the tran group first and then do the following 
+
+   3.1. It will ask the user to choose from the option 1. to convert legacy screen 2. To create spec for new features in the existing screen
+        3.1.1. If the user chose the option 1, then 
+               3.1.1.1. it will read the MoveGroup.md file and for each transaction and mapset defined in it, the agent will read the Screen-metadata.md file and also the respective bms 
+                        map from input/bms folder to get the file definition , field layout and others .Skip Needs Review and Summary section of the Screen-metadata.md file.
+  	       3.1.1.2. Build the target screens using the target technology mentioned under the Frontend/UI category in the Config.md file under config/ folder and also apply the UI 
+                        styles as available in the Style-sheet.md file. 
+	       3.1.2.3. Create the necessary target folder for the screen build and to display the screen that got built.
+		
+      
+         3.1.2. If the user chose option 2, then ask the screen name and the feature name and short description from the user. Then create a spec file with the Sections Change Overview & Objective, Placement & Layout Impact, New Element Specification, Component States & Variants, Content & Copy, Interaction Behavior, Impact on Existing Elements, Responsive Behavior, Accessibility Requirements, Edge Case Visual States, Deviations & Assumptions, Acceptance Criteria intuitively from the feature name and description and from the definition of the existing screen. Ask the user to add additional input which could be deduced from the available inputs. If the existing screen is not present then abort.
+
+         3.1.3. Create the spec under .Claude/Specs/UI-Spec/  with the naming convention <Screen Name>-<Tran Group>-Spec. md under .Claude/Specs/UI-Spec
+
+
+
+Now create a command named Build-UI which when invoked will ask the user for the Option 1. Rebuild 2. Refactor. If user chose option1, then run sub agent Rebuild-UI-Spec only and if user select Option 2 , then run sub agent Refactor-UI.md. While creating this command, do not duplicate any instructions which is/are already present in these two sub agents instruction.

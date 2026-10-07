@@ -1,0 +1,805 @@
+<title>MG-01 Architecture Verdict</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --ground:      #EFF1F4;
+    --surface:     #FCFDFE;
+    --surface-2:   #E7EAEF;
+    --ink:         #151A21;
+    --ink-2:       #5A6675;
+    --ink-3:       #7C8998;
+    --rule:        #D3D9E0;
+    --rule-strong: #B9C2CD;
+    --accent:      #2D4A6B;
+    --accent-soft: #DDE5EF;
+
+    --pass:        #2F6F4E;
+    --pass-tint:   #DCEBE2;
+    --partial:     #8F5A16;
+    --partial-tint:#F2E6D0;
+    --absent:      #9B3A32;
+    --absent-tint: #F2DEDB;
+
+    --shadow: 0 1px 2px rgba(21, 26, 33, .05), 0 8px 24px -12px rgba(21, 26, 33, .14);
+
+    --measure: 68ch;
+    --wide: 1040px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #11151B;
+      --surface:     #191F27;
+      --surface-2:   #212932;
+      --ink:         #E4E9EF;
+      --ink-2:       #97A4B4;
+      --ink-3:       #7B8898;
+      --rule:        #2A333F;
+      --rule-strong: #3B4756;
+      --accent:      #86ABD6;
+      --accent-soft: #1E2B3A;
+
+      --pass:        #63B48B;
+      --pass-tint:   #16291F;
+      --partial:     #D8A249;
+      --partial-tint:#2B2317;
+      --absent:      #DE7C72;
+      --absent-tint: #2C1A18;
+
+      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -12px rgba(0, 0, 0, .6);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground:      #11151B;
+    --surface:     #191F27;
+    --surface-2:   #212932;
+    --ink:         #E4E9EF;
+    --ink-2:       #97A4B4;
+    --ink-3:       #7B8898;
+    --rule:        #2A333F;
+    --rule-strong: #3B4756;
+    --accent:      #86ABD6;
+    --accent-soft: #1E2B3A;
+
+    --pass:        #63B48B;
+    --pass-tint:   #16291F;
+    --partial:     #D8A249;
+    --partial-tint:#2B2317;
+    --absent:      #DE7C72;
+    --absent-tint: #2C1A18;
+
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -12px rgba(0, 0, 0, .6);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 16.5px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
+    padding: 0 24px 96px;
+  }
+
+  .sheet {
+    max-width: var(--wide);
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 56px;
+  }
+
+  h1, h2, h3 {
+    font-family: "Familjen Grotesk", "IBM Plex Sans", sans-serif;
+    text-wrap: balance;
+    margin: 0;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+  }
+
+  h1 { font-size: clamp(2.1rem, 1.3rem + 2.7vw, 3.1rem); font-weight: 700; }
+  h2 { font-size: clamp(1.35rem, 1.1rem + 0.9vw, 1.7rem); font-weight: 600; }
+
+  p { margin: 0; }
+
+  code, .mono, pre {
+    font-family: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  code {
+    font-size: 0.855em;
+    background: var(--surface-2);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 0.09em 0.36em;
+    word-break: break-word;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* ---------- masthead ---------- */
+
+  .masthead {
+    padding-top: 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+  }
+
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.715rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 18px;
+    align-items: center;
+  }
+
+  .eyebrow .sep { color: var(--rule-strong); }
+
+  .verdict {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--partial);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+    padding: 30px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .verdict-line {
+    font-family: "Familjen Grotesk", sans-serif;
+    font-size: clamp(1.25rem, 1rem + 1vw, 1.6rem);
+    font-weight: 600;
+    line-height: 1.32;
+    text-wrap: balance;
+  }
+
+  .verdict-line em { font-style: normal; color: var(--partial); }
+
+  .verdict p.body { color: var(--ink-2); max-width: var(--measure); }
+  .verdict p.body em { font-style: italic; color: var(--ink-2); }
+
+  .tally {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-top: 4px;
+  }
+
+  /* ---------- chips ---------- */
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.685rem;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 3px;
+    white-space: nowrap;
+    border: 1px solid transparent;
+  }
+
+  .chip::before {
+    content: "";
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex: none;
+  }
+
+  .chip.pass    { color: var(--pass);    background: var(--pass-tint);    border-color: color-mix(in srgb, var(--pass) 26%, transparent); }
+  .chip.partial { color: var(--partial); background: var(--partial-tint); border-color: color-mix(in srgb, var(--partial) 26%, transparent); }
+  .chip.absent  { color: var(--absent);  background: var(--absent-tint);  border-color: color-mix(in srgb, var(--absent) 26%, transparent); }
+
+  /* ---------- sections ---------- */
+
+  section { display: flex; flex-direction: column; gap: 20px; }
+
+  .section-head {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-top: 1px solid var(--rule-strong);
+    padding-top: 20px;
+  }
+
+  .section-head .kicker {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .lede { color: var(--ink-2); max-width: var(--measure); }
+  .lede em { font-style: italic; }
+
+  /* ---------- tables ---------- */
+
+  .table-wrap {
+    overflow-x: auto;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 660px;
+    font-size: 0.935rem;
+  }
+
+  thead th {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.685rem;
+    font-weight: 600;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    text-align: left;
+    padding: 13px 20px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--rule);
+    white-space: nowrap;
+  }
+
+  tbody td {
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+
+  td.status { width: 1%; white-space: nowrap; }
+  td.crit { font-weight: 500; width: 24%; }
+  td.evidence { color: var(--ink-2); font-size: 0.9rem; }
+  td.evidence code { font-size: 0.82em; }
+  td.evidence em { font-style: italic; }
+
+  .claim {
+    display: block;
+    color: var(--ink-2);
+    font-style: italic;
+    border-left: 2px solid var(--rule-strong);
+    padding-left: 12px;
+    margin-bottom: 8px;
+  }
+
+  /* ---------- diagram ---------- */
+
+  figure {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .diagram-wrap {
+    overflow-x: auto;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+    padding: 28px 24px;
+  }
+
+  .diagram-wrap svg { display: block; min-width: 720px; width: 100%; height: auto; }
+
+  .d-box       { fill: var(--surface-2); stroke: var(--rule-strong); stroke-width: 1.25; }
+  .d-box-live  { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.5; }
+  .d-box-ghost { fill: none; stroke: var(--absent); stroke-width: 1.25; stroke-dasharray: 5 4; opacity: .75; }
+  .d-label     { font-family: "IBM Plex Sans", sans-serif; font-size: 14px; font-weight: 600; fill: var(--ink); }
+  .d-sub       { font-family: "IBM Plex Mono", monospace; font-size: 11px; fill: var(--ink-2); }
+  .d-ghost-txt { fill: var(--absent); }
+  .d-flow      { stroke: var(--accent); stroke-width: 1.75; fill: none; }
+  .d-flow-dead { stroke: var(--absent); stroke-width: 1.25; fill: none; stroke-dasharray: 5 4; opacity: .7; }
+  .d-note      { font-family: "IBM Plex Mono", monospace; font-size: 11px; fill: var(--accent); font-weight: 500; }
+
+  figcaption { font-size: 0.875rem; color: var(--ink-2); max-width: var(--measure); }
+  figcaption em { font-style: italic; }
+
+  /* ---------- corroboration cards ---------- */
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+    padding: 20px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .card .src {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    color: var(--ink-3);
+  }
+
+  .quote {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.845rem;
+    line-height: 1.55;
+    color: var(--ink);
+    border-left: 3px solid var(--partial);
+    padding-left: 14px;
+  }
+
+  .card .gloss { font-size: 0.88rem; color: var(--ink-2); }
+
+  /* ---------- checklist ---------- */
+
+  .checks {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .check {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    gap: 12px 28px;
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .check:last-child { border-bottom: none; }
+
+  .check .q {
+    grid-column: 1 / -1;
+    font-weight: 600;
+    font-size: 0.96rem;
+  }
+
+  .check pre {
+    margin: 0;
+    font-size: 0.815rem;
+    line-height: 1.6;
+    color: var(--ink);
+    background: var(--surface-2);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 11px 13px;
+    overflow-x: auto;
+  }
+
+  .check .result {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    justify-content: center;
+    font-size: 0.875rem;
+    color: var(--ink-2);
+  }
+
+  .check .result .val {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.85rem;
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  @media (max-width: 720px) {
+    .check { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- wording callout ---------- */
+
+  .wording {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--accent);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+    padding: 26px 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .replace {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px 18px;
+    align-items: start;
+    font-size: 0.95rem;
+  }
+
+  .replace .tag {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    padding-top: 5px;
+    white-space: nowrap;
+  }
+
+  .replace .old { color: var(--ink-2); text-decoration: line-through; text-decoration-color: var(--absent); }
+  .replace .new { color: var(--ink); font-weight: 500; }
+
+  .trigger {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    align-items: baseline;
+    font-size: 0.95rem;
+    color: var(--ink-2);
+    border-top: 1px solid var(--rule);
+    padding-top: 16px;
+  }
+
+  .trigger strong { color: var(--ink); font-weight: 600; }
+
+  footer {
+    border-top: 1px solid var(--rule-strong);
+    padding-top: 20px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    color: var(--ink-3);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+  }
+</style>
+
+<div class="sheet">
+
+  <header class="masthead">
+    <div class="eyebrow">
+      <span>CICS Modernization Workbench</span>
+      <span class="sep">/</span>
+      <span>Tran Group MG-01</span>
+      <span class="sep">/</span>
+      <span>Transaction Type Maintenance</span>
+      <span class="sep">/</span>
+      <span>Architecture conformance</span>
+    </div>
+
+    <h1>Is the target actually microservices?</h1>
+
+    <div class="verdict">
+      <p class="verdict-line">
+        It is <em>one correctly-built microservice</em> &mdash; not a microservices architecture.
+      </p>
+      <p class="body">
+        Every structural property of a microservice holds inside the one service that exists. None of the
+        properties that only appear <em>between</em> services can be observed, because there is exactly one.
+        The pattern is right; the system is N&nbsp;=&nbsp;1, so the label in <code>Config/Config.md</code>
+        and the HTML report is aspirational rather than demonstrated.
+      </p>
+      <div class="tally">
+        <span class="chip pass">Service-level &middot; 7 of 7</span>
+        <span class="chip absent">System-level &middot; 0 of 3</span>
+        <span class="chip partial">Verdict &middot; service-based</span>
+      </div>
+    </div>
+  </header>
+
+  <section>
+    <div class="section-head">
+      <span class="kicker">The distinction that matters</span>
+      <h2>A microservice is a shape. Microservices is a topology.</h2>
+    </div>
+    <p class="lede">
+      Reviewing <code>Target/MG-01/</code> answers two different questions, and the report currently
+      conflates them. The first &mdash; <em>is this service shaped like a microservice?</em> &mdash; is about
+      bounded context, statelessness, data ownership, and independent deployability. It passes cleanly. The
+      second &mdash; <em>is this a microservices system?</em> &mdash; is about decomposition, an edge, and
+      service-to-service communication. There is nothing yet to decompose into, no gateway in front, and no
+      peer to talk to.
+    </p>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <span class="kicker">Service-level conformance &middot; verified in code</span>
+      <h2>What genuinely passes</h2>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Status</th>
+            <th scope="col">Property</th>
+            <th scope="col">Evidence in the built target</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="status"><span class="chip pass">Pass</span></td>
+            <td class="crit">Independently deployable unit</td>
+            <td class="evidence">Own <code>pom.xml</code>, own artifact <code>com.carddemo:transaction-type-service:1.0.0</code>, own JVM process, own port <code>8080</code>.</td>
+          </tr>
+          <tr>
+            <td class="status"><span class="chip pass">Pass</span></td>
+            <td class="crit">Owns its data exclusively</td>
+            <td class="evidence">A single <code>@Entity</code> mapped to <code>transaction_type</code> in <code>model/TransactionType.java:15</code>. <code>TRANSACTION_TYPE_CATEGORY</code> is deliberately unmapped and reached only as an inbound foreign key &mdash; no shared-database-across-services smell.</td>
+          </tr>
+          <tr>
+            <td class="status"><span class="chip pass">Pass</span></td>
+            <td class="crit">Stateless request handling</td>
+            <td class="evidence"><code>SessionCreationPolicy.STATELESS</code> in <code>security/SecurityConfig.java:75</code>, <code>open-in-view: false</code>, bearer-JWT resource server. Conversational state &mdash; the COMMAREA replacement &mdash; is held client-side in the SPA.</td>
+          </tr>
+          <tr>
+            <td class="status"><span class="chip pass">Pass</span></td>
+            <td class="crit">Externalized configuration</td>
+            <td class="evidence"><code>DB_URL</code>, <code>DB_USERNAME</code>, <code>DB_PASSWORD</code> and <code>JWT_EXPECTED_AUDIENCES</code> are read from the environment. The two credentials carry no defaults, so the service fails fast rather than falling back to a superuser.</td>
+          </tr>
+          <tr>
+            <td class="status"><span class="chip pass">Pass</span></td>
+            <td class="crit">Versioned, published contract</td>
+            <td class="evidence"><code>/api/v1/transaction-types</code> across five endpoints, plus a machine-readable OpenAPI&nbsp;3 document at <code>/v3/api-docs</code> served behind authentication.</td>
+          </tr>
+          <tr>
+            <td class="status"><span class="chip pass">Pass</span></td>
+            <td class="crit">Externalized identity</td>
+            <td class="evidence">Keycloak realm <code>carddemo</code> issues the tokens; realm roles map to the <code>TXN_TYPE_ADMIN</code> and <code>TXN_TYPE_READ</code> authorities. No in-app user table.</td>
+          </tr>
+          <tr>
+            <td class="status"><span class="chip pass">Pass</span></td>
+            <td class="crit">Operable in isolation</td>
+            <td class="evidence">Actuator <code>health</code> with <code>probes.enabled: true</code>; a per-connection <code>SET lock_timeout = '3s'</code> so a contended write fails fast as <code>409 TXN_TYPE_LOCK_CONFLICT</code> instead of hanging.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <span class="kicker">System-level conformance &middot; specified but not built</span>
+      <h2>What is missing &mdash; and why you could not have known</h2>
+    </div>
+    <p class="lede">
+      <code>Artefacts/Architecture/MG-01.Architecture.md</code> describes components that do not exist in
+      <code>Target/</code>. Each row quotes the architecture document, then states what the code does.
+    </p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Status</th>
+            <th scope="col">Component</th>
+            <th scope="col">Document claim vs. built reality</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="status"><span class="chip absent">Absent</span></td>
+            <td class="crit">API gateway</td>
+            <td class="evidence">
+              <span class="claim">&ldquo;&hellip;talks over REST (through an API gateway)&hellip; The API gateway terminates TLS, validates the bearer token at the edge, and forwards to the service.&rdquo;</span>
+              No gateway exists anywhere in the repository. The SPA reaches Spring directly through the Vite dev proxy &mdash; <code>vite.config.js</code> forwards <code>/api</code> to <code>http://localhost:8080</code>.
+            </td>
+          </tr>
+          <tr>
+            <td class="status"><span class="chip absent">Absent</span></td>
+            <td class="crit">TLS 1.3 transport</td>
+            <td class="evidence">
+              <span class="claim">&ldquo;TLS 1.3 &mdash; terminated at the API gateway/ingress; HTTP rejected, HSTS set.&rdquo;</span>
+              The service listens on plain HTTP. There is no <code>server.ssl.*</code> block in <code>application.yml</code> and no ingress to terminate at. <code>.Claude/settings.local.json</code> still allowlists <code>https://localhost:8443</code>, an endpoint nothing serves.
+            </td>
+          </tr>
+          <tr>
+            <td class="status"><span class="chip absent">Absent</span></td>
+            <td class="crit">A second service</td>
+            <td class="evidence">
+              <span class="claim">&ldquo;Style&hellip; A single-purpose, service-based / microservice deployment.&rdquo;</span>
+              Accurate as written &mdash; and that is the point. One service cannot be independent <em>of</em> anything. Only <code>Target/MG-01/</code> exists; there is no MG-02.
+            </td>
+          </tr>
+          <tr>
+            <td class="status"><span class="chip partial">N/A at N=1</span></td>
+            <td class="crit">Discovery, resilience, messaging</td>
+            <td class="evidence">A grep across <code>src/main/java</code> for <code>RestTemplate</code>, <code>WebClient</code>, <code>FeignClient</code>, <code>EnableDiscoveryClient</code>, <code>CircuitBreaker</code>, <code>KafkaTemplate</code> and <code>RedisTemplate</code> returns nothing. Legitimately so &mdash; MG-01 uses no VSAM, TSQ, TDQ or MQ, so there is genuinely nothing to call.</td>
+          </tr>
+          <tr>
+            <td class="status"><span class="chip absent">Absent</span></td>
+            <td class="crit">Deployment unit</td>
+            <td class="evidence">No <code>Dockerfile</code>, compose file, Helm chart or Kubernetes manifest under <code>Target/</code>. Independent deployability is therefore a design claim that has never been exercised. <em>The only Dockerfile in the repository belongs to the vendored <code>mcp-database-server</code>.</em></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <span class="kicker">Topology</span>
+      <h2>The specified path and the built path</h2>
+    </div>
+    <figure>
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 940 290" role="img" aria-label="Diagram: the React SPA reaches the Transaction Type service directly over plain HTTP through the Vite dev proxy, bypassing the API gateway that the architecture document specifies but which was never built. The service then reaches Postgres over JDBC.">
+          <defs>
+            <marker id="arrowLive" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--accent)"></path>
+            </marker>
+            <marker id="arrowDead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--absent)" opacity="0.7"></path>
+            </marker>
+          </defs>
+
+          <text class="d-sub d-ghost-txt" x="366" y="26" text-anchor="middle">specified route &mdash; never built</text>
+          <line class="d-flow-dead" x1="184" y1="60" x2="264" y2="60" marker-end="url(#arrowDead)"></line>
+          <line class="d-flow-dead" x1="468" y1="60" x2="548" y2="60" marker-end="url(#arrowDead)"></line>
+
+          <rect class="d-box-live" x="12" y="72" width="168" height="72" rx="4"></rect>
+          <text class="d-label" x="96" y="102" text-anchor="middle">React SPA</text>
+          <text class="d-sub" x="96" y="122" text-anchor="middle">vite dev server :5173</text>
+
+          <rect class="d-box-ghost" x="268" y="72" width="196" height="72" rx="4"></rect>
+          <text class="d-label d-ghost-txt" x="366" y="98" text-anchor="middle">API Gateway</text>
+          <text class="d-sub d-ghost-txt" x="366" y="117" text-anchor="middle">TLS 1.3 &middot; edge JWT</text>
+          <text class="d-sub d-ghost-txt" x="366" y="133" text-anchor="middle" font-weight="600">NOT BUILT</text>
+
+          <rect class="d-box-live" x="552" y="72" width="196" height="72" rx="4"></rect>
+          <text class="d-label" x="650" y="98" text-anchor="middle">Transaction Type service</text>
+          <text class="d-sub" x="650" y="117" text-anchor="middle">Spring Boot 3.4.2 &middot; Java 21</text>
+          <text class="d-sub" x="650" y="133" text-anchor="middle">:8080 &middot; plain HTTP</text>
+
+          <rect class="d-box" x="820" y="72" width="108" height="72" rx="4"></rect>
+          <text class="d-label" x="874" y="102" text-anchor="middle">Postgres</text>
+          <text class="d-sub" x="874" y="122" text-anchor="middle">CARDDEMO</text>
+
+          <line class="d-flow" x1="752" y1="108" x2="812" y2="108" marker-end="url(#arrowLive)"></line>
+          <text class="d-sub" x="782" y="94" text-anchor="middle">JDBC</text>
+
+          <path class="d-flow" d="M 96 152 L 96 214 Q 96 228 110 228 L 636 228 Q 650 228 650 214 L 650 154" marker-end="url(#arrowLive)"></path>
+          <text class="d-note" x="373" y="256" text-anchor="middle">actual route &mdash; vite proxy forwards /api to http://localhost:8080</text>
+          <text class="d-note" x="373" y="272" text-anchor="middle">unencrypted, no edge authentication</text>
+        </svg>
+      </div>
+      <figcaption>
+        Every request in the running system takes the lower path. The gateway that the architecture document
+        credits with TLS termination and edge token validation is not in the repository, so both
+        responsibilities are currently unowned.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <span class="kicker">Corroboration</span>
+      <h2>The code already documents both gaps</h2>
+    </div>
+    <p class="lede">
+      These are not inferences. The build files state the absence in their own comments &mdash; which is why
+      the remediation was pushed into the service in the first place.
+    </p>
+    <div class="cards">
+      <div class="card">
+        <span class="src">pom.xml &middot; bucket4j dependency</span>
+        <p class="quote">&ldquo;SEC-006: token-bucket rate limiting applied in-process (<strong>no API gateway exists in the built target</strong>). Used by RateLimitFilter.&rdquo;</p>
+        <p class="gloss">Rate limiting belongs at the edge. It sits inside the service precisely because there is no edge &mdash; and the buckets are in-memory, so the budget is per instance and would not survive horizontal scaling.</p>
+      </div>
+      <div class="card">
+        <span class="src">application.yml &middot; app.security.expected-audiences</span>
+        <p class="quote">&ldquo;Set JWT_EXPECTED_AUDIENCES to the audience value the Keycloak client actually mints &mdash; <strong>required before a second microservice shares this realm</strong>. Empty keeps issuer/signature/expiry-only validation.&rdquo;</p>
+        <p class="gloss">The value is empty today, so the <code>aud</code> claim is not enforced. The comment is explicit that this is safe only while the realm has a single consumer.</p>
+      </div>
+      <div class="card">
+        <span class="src">application.yml &middot; datasource url</span>
+        <p class="quote">&ldquo;Keep <code>prefer</code> for a local sandbox Postgres that has no server certificate, and set <code>require</code> &hellip; for every shared or deployed environment.&rdquo;</p>
+        <p class="gloss">Configured as <code>DB_SSL_MODE:prefer</code>. The knob exists and is correctly placed; it has simply never been turned, because there is no deployed topology to turn it for.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <span class="kicker">Repeatable check</span>
+      <h2>How to answer this yourself, for any group</h2>
+    </div>
+    <p class="lede">
+      Run these four from the repository root against any <code>Target/&lt;Group&gt;/</code>. Together they
+      separate &ldquo;a microservice&rdquo; from &ldquo;microservices&rdquo; without reading a line of the
+      architecture document.
+    </p>
+    <div class="checks">
+      <div class="check">
+        <span class="q">How many independently deployable units are there?</span>
+        <pre>find Target -name pom.xml \
+  -not -path "*/target/*" | wc -l</pre>
+        <div class="result">
+          <span class="val">1</span>
+          <span>Microservices requires more than one. One is a service.</span>
+        </div>
+      </div>
+      <div class="check">
+        <span class="q">Does each service exclusively own its tables?</span>
+        <pre>grep -rn "@Table" \
+  Target/*/Backend/*/src/main/java</pre>
+        <div class="result">
+          <span class="val">transaction_type &mdash; once</span>
+          <span>The same table mapped in two services means a shared database, which disqualifies the topology.</span>
+        </div>
+      </div>
+      <div class="check">
+        <span class="q">Is there an edge &mdash; gateway, ingress, or TLS?</span>
+        <pre>grep -rn "server.ssl\|gateway\|ingress" \
+  Target/ --include=*.yml --include=*.xml</pre>
+        <div class="result">
+          <span class="val">no matches</span>
+          <span>No edge means TLS termination and edge authentication are unowned, whatever the document says.</span>
+        </div>
+      </div>
+      <div class="check">
+        <span class="q">Is the service actually shippable on its own?</span>
+        <pre>find Target -iname "Dockerfile*" \
+  -o -iname "docker-compose*"</pre>
+        <div class="result">
+          <span class="val">no matches</span>
+          <span>Without a deployment unit, independent deployability has never been tested.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <span class="kicker">Recommendation</span>
+      <h2>Wording that survives review</h2>
+    </div>
+    <div class="wording">
+      <div class="replace">
+        <span class="tag">Currently</span>
+        <span class="old">Architecture Type: Microservices</span>
+        <span class="tag">Replace with</span>
+        <span class="new">Service-based architecture &mdash; one stateless, independently deployable service owning its bounded context. Gateway, TLS termination, and containerization are specified but not yet built.</span>
+      </div>
+      <div class="trigger">
+        <strong>Becomes &ldquo;microservices&rdquo; when:</strong>
+        <span>MG-02 ships as a second service, behind a real gateway, with <code>JWT_EXPECTED_AUDIENCES</code> set and <code>DB_SSL_MODE=require</code>. Building the gateway before that second service buys nothing &mdash; the in-process rate limiter and the direct proxy are the correct call at N&nbsp;=&nbsp;1.</span>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Scope: Target/MG-01 &mdash; Frontend + Backend/transaction-type-service</span>
+    <span>Reviewed 27 Aug 2026</span>
+    <span>Static review &mdash; no code changed</span>
+  </footer>
+
+</div>

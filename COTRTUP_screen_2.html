@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CardDemo - COTRTUP (Transaction Type Update) - CICS Screen Mockup</title>
+<style>
+  :root{
+    --blue:#4d9cff;
+    --red:#ff5555;
+    --yellow:#ffe14d;
+    --green:#4dff4d;
+    --turquoise:#4dfff2;
+    --neutral:#f2f2f2;
+    --default:#4dff4d;
+  }
+  body{
+    background:#111;
+    color:#ccc;
+    font-family:'Segoe UI',Arial,sans-serif;
+    margin:0;
+    padding:24px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:14px;
+  }
+  h1{ font-size:16px; font-weight:600; color:#eee; margin:0; }
+  .meta{ font-size:12px; color:#888; text-align:center; max-width:720px; line-height:1.5; }
+  .bezel{
+    background:#000;
+    border-radius:10px;
+    padding:18px;
+    box-shadow:0 0 0 2px #333, 0 12px 30px rgba(0,0,0,0.6);
+  }
+  .screen{
+    position:relative;
+    display:grid;
+    grid-template-columns:repeat(80, 1ch);
+    grid-template-rows:repeat(24, 20px);
+    background:#000;
+    font-family:'Courier New', Consolas, monospace;
+    font-size:15px;
+    line-height:20px;
+    letter-spacing:1px;
+  }
+  .f{
+    white-space:pre;
+    overflow:hidden;
+  }
+  .blue{ color:var(--blue); }
+  .red{ color:var(--red); font-weight:bold; }
+  .yellow{ color:var(--yellow); }
+  .green{ color:var(--green); }
+  .turquoise{ color:var(--turquoise); }
+  .neutral{ color:var(--neutral); }
+  .default{ color:var(--default); }
+  .u{ text-decoration:underline; }
+  .in{ background:rgba(255,255,255,0.04); }
+  .drk{ opacity:0.35; }
+  .legend{
+    display:flex; flex-wrap:wrap; gap:14px; font-size:11px; color:#999; max-width:640px; justify-content:center;
+  }
+  .legend span{ display:inline-flex; align-items:center; gap:5px; }
+  .sw{ width:10px; height:10px; border-radius:2px; display:inline-block; }
+  .sw.dash{ background:none; border:1px dashed #999; }
+</style>
+</head>
+<body>
+
+
+<div class="bezel">
+<div class="screen">
+
+  <!-- Row 1 -->
+  <div class="f blue"      style="grid-row:1; grid-column:1 / span 5;">Tran:</div>
+  <div class="f blue"      style="grid-row:1; grid-column:7 / span 4;">CT01</div>
+  <div class="f yellow"    style="grid-row:1; grid-column:21 / span 40;">CardDemo Application</div>
+  <div class="f blue"      style="grid-row:1; grid-column:65 / span 5;">Date:</div>
+  <div class="f blue"      style="grid-row:1; grid-column:71 / span 8;">08/20/26</div>
+
+  <!-- Row 2 -->
+  <div class="f blue"      style="grid-row:2; grid-column:1 / span 5;">Prog:</div>
+  <div class="f blue"      style="grid-row:2; grid-column:7 / span 8;">COTRT02C</div>
+  <div class="f yellow"    style="grid-row:2; grid-column:21 / span 40;">Transaction Type Update</div>
+  <div class="f blue"      style="grid-row:2; grid-column:65 / span 5;">Time:</div>
+  <div class="f blue"      style="grid-row:2; grid-column:71 / span 8;">14:32:07</div>
+
+  <!-- Row 7 -->
+  <div class="f neutral"   style="grid-row:7; grid-column:25 / span 35;">Maintain Transaction Type</div>
+
+  <!-- Row 12 -->
+  <div class="f turquoise" style="grid-row:12; grid-column:4 / span 19;">Transaction Type  :</div>
+  <div class="f default u in" style="grid-row:12; grid-column:26 / span 2;">01</div>
+
+  <!-- Row 14 -->
+  <div class="f turquoise" style="grid-row:14; grid-column:4 / span 19;">Description       :</div>
+  <div class="f default u in" style="grid-row:14; grid-column:26 / span 50;">Purchase</div>
+
+  <!-- Row 22 -->
+  <div class="f neutral"   style="grid-row:22; grid-column:23 / span 45;">Transaction type displayed for update</div>
+
+  <!-- Row 23 -->
+  <div class="f red"       style="grid-row:23; grid-column:1 / span 78;">&nbsp;</div>
+
+  <!-- Row 24 : PF key legend -->
+  <div class="f yellow"     style="grid-row:24; grid-column:1 / span 21;">ENTER=Process F3=Exit</div>
+  <div class="f yellow drk" style="grid-row:24; grid-column:23 / span 9;">F4=Delete</div>
+  <div class="f yellow drk" style="grid-row:24; grid-column:33 / span 8;">F5=Save</div>
+  <div class="f yellow drk" style="grid-row:24; grid-column:43 / span 6;">F6=Add</div>
+  <div class="f yellow drk" style="grid-row:24; grid-column:69 / span 10;">F12=Cancel</div>
+
+</div>
+</div>
+
+</body>
+</html>
